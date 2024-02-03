@@ -32,15 +32,16 @@ export default async function Home() {
         <BookingItem />
       </div>
 
-      <div className="mt-6">
+      <div className="mb-6 mt-6">
         <h2 className="mb-3 px-5 text-xs font-bold uppercase text-gray-400">
           Recomendados
         </h2>
-      </div>
-      <div className="flex px-5 gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-        {babrbershops.map((barbershop) => (
-          <BarbershopItem key={barbershop.id} barbershop={barbershop} />
-        ))}
+
+        <div className="flex gap-4 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
+          {babrbershops.map((barbershop) => (
+            <BarbershopItem key={barbershop.id} barbershop={barbershop} />
+          ))}
+        </div>
       </div>
     </div>
   );
