@@ -1,5 +1,6 @@
 import BarbershopItem from "@/app/_components/barbershop-item";
 import { db } from "@/app/_lib/prisma";
+import BarbershopInfo from "../_components/barbershop-info";
 
 interface BarbershopDetailsPageProps {
   params: {
@@ -26,13 +27,7 @@ const BarbershopDetailsPage = async ({
     return null;
   }
 
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      <div key={barbershop.id} className="w-full">
-        <BarbershopItem barbershop={barbershop} />
-      </div>
-    </div>
-  );
+  return <BarbershopInfo barbershop={barbershop} />;
 };
 
 export default BarbershopDetailsPage;
