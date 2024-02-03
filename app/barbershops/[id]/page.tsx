@@ -1,4 +1,4 @@
-import BarbershopItem from "@/app/(home)/_components/barbershop-items";
+import BarbershopItem from "@/app/_components/barbershop-item";
 import { db } from "@/app/_lib/prisma";
 
 interface BarbershopDetailsPageProps {
