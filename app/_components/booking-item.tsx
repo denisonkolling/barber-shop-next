@@ -1,3 +1,5 @@
+"use client";
+
 import { Booking, Prisma } from "@prisma/client";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
@@ -15,6 +17,9 @@ import {
 } from "./ui/sheet";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { cancelBooking } from "../_actions/cancel-booking";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface BookingItemProps {
   booking: Prisma.BookingGetPayload<{
@@ -27,6 +32,20 @@ interface BookingItemProps {
 
 const BookingItem = ({ booking }: BookingItemProps) => {
   const isBookingConfirmed = isFuture(booking.date);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+
+  const handleCancelClick = async () => {
+    try {
+      setIsDeleteLoading(true);
+      await cancelBooking(booking.id);
+
+      toast.success("Reserva cancelada com sucesso!");
+    } catch (error) {
+      toast.error("Ocorreu um erro ao cancelar a reserva");
+    } finally {
+      setIsDeleteLoading(false);
+    }
+  };
 
   return (
     <Sheet>
@@ -91,14 +110,14 @@ const BookingItem = ({ booking }: BookingItemProps) => {
               </div>
               <Badge
                 variant={isBookingConfirmed ? "default" : "secondary"}
-                className="flex justify-start my-4 w-fit"
+                className="my-4 flex w-fit justify-start"
               >
                 {isBookingConfirmed ? "Confirmado" : "Finalizado"}
               </Badge>
 
               <Card>
                 <CardContent className="flex flex-col gap-3 p-3">
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <h2 className="font-bold">{booking.service.name}</h2>
                     <h3 className="text-sm font-bold">
                       {Intl.NumberFormat("pt-BR", {
@@ -136,7 +155,12 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                     Voltar
                   </Button>
                 </SheetClose>
-                <Button className="w-full" variant="destructive">
+                <Button
+                  onClick={handleCancelClick}
+                  className="w-full"
+                  variant="destructive"
+                  disabled={!isBookingConfirmed || isDeleteLoading}
+                >
                   Cancelar Reserva
                 </Button>
               </SheetFooter>
