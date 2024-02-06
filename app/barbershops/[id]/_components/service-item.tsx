@@ -11,10 +11,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/app/_components/ui/sheet";
-import { Service, Barbershop } from "@prisma/client";
+import { Service, Barbershop, Booking } from "@prisma/client";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ptBR } from "date-fns/locale";
 import { generateDayTimeList } from "../_helpers/hours";
 import { format } from "date-fns";
@@ -23,7 +23,7 @@ import { saveBooking } from "../_actions/save-booking";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
+import { getDayBookings } from "../_actions/get-day-bookings";
 
 interface ServiceItemProps {
   barbershop: Barbershop;
@@ -32,7 +32,6 @@ interface ServiceItemProps {
 }
 
 const ServiceItem = ({ service, barbershop, isAuthenticated,}: ServiceItemProps) => {
-  
   const { data } = useSession();
 
   const handleBookingClick = () => {
@@ -47,9 +46,24 @@ const ServiceItem = ({ service, barbershop, isAuthenticated,}: ServiceItemProps)
   const [hour, setHour] = useState<string | undefined>();
   const [submitIsLoading, setSubmitIsLoading] = useState(false);
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
+  const [dayBookings, setDayBookings] = useState<Booking[]>([]);
+
+  useEffect(() => {
+    if (!date) {
+      return;
+    }
+
+    const refreshAvailableHours = async () => {
+      const _dayBookings = await getDayBookings(barbershop.id, date);
+      setDayBookings(_dayBookings);
+    };
+
+    refreshAvailableHours();
+  }, [date, barbershop.id]);
 
   const handleDateClick = (date: Date | undefined) => {
     setDate(date);
+    setHour(undefined);
   };
 
   const handleHourClick = (time: string | undefined) => {
@@ -57,8 +71,28 @@ const ServiceItem = ({ service, barbershop, isAuthenticated,}: ServiceItemProps)
   };
 
   const timeList = useMemo(() => {
-    return date ? generateDayTimeList(date) : [];
-  }, [date]);
+    if (!date) {
+      return [];
+    }
+
+    return generateDayTimeList(date).filter((time) => {
+      const timeHour = Number(time.split(":")[0]);
+      const timeMinutes = Number(time.split(":")[1]);
+
+      const booking = dayBookings.find((booking) => {
+        const bookingHour = booking.date.getHours();
+        const bookingMinutes = booking.date.getMinutes();
+
+        return bookingHour === timeHour && bookingMinutes === timeMinutes;
+      });
+
+      if (!booking) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [date, dayBookings]);
 
   const handleBookingSubmit = async () => {
     setSubmitIsLoading(true);
