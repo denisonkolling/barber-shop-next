@@ -9,7 +9,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 
 export default async function Home() {
-
   const session = await getServerSession(authOptions);
 
   const [barbershops, confirmedBookings] = await Promise.all([
@@ -46,15 +45,21 @@ export default async function Home() {
         <Search />
       </div>
 
-      <div className="mt-6">
-        <h2 className="pl-5 text-xs mb-3 uppercase text-gray-400 font-bold">Agendamentos</h2>
+      {confirmedBookings.length > 0 && (
+        <>
+          <div className="mt-6">
+            <h2 className="mb-3 pl-5 text-xs font-bold uppercase text-gray-400">
+              Agendamentos
+            </h2>
 
-        <div className="px-5 flex flex-col gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-          {confirmedBookings.map((booking) => (
-            <BookingItem key={booking.id} booking={booking} />
-          ))}
-        </div>
-      </div>
+            <div className="flex flex-col gap-3 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
+              {confirmedBookings.map((booking) => (
+                <BookingItem key={booking.id} booking={booking} />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="mb-6 mt-6">
         <h2 className="mb-3 px-5 text-xs font-bold uppercase text-gray-400">
